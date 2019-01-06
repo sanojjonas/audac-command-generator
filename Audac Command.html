@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Audac Command Generator</title>
+</head>
+<style>
+body{
+	background: url(https://audac.eu/Content/images/audac-logo.png) top right no-repeat fixed,linear-gradient(grey, white) no-repeat fixed;
+}
+</style>
+<body onload="startup()">
+	<div id="matrixgenerator">
+		<button onclick="return showgenerator('sourcegenerator','matrixgenerator');">Show Source Generator</button>
+		<H1>Audac Matrix Command Generator</h1>
+		<table>	
+			<tr>
+				<td id="cmatrix">choose matrix</td>
+				<td>
+					<select id="device" onchange="choose_device()"></select>
+				</td>
+			</tr>
+			<tr>
+				<td id="cadres">choose adres</td>
+				<td>
+					<select id="adres"></select>
+				</td>
+			</tr>
+			<tr>
+				<td id="ccommand">choose command</td>
+				<td>
+					<select id="command" onchange="choose_cmd()"></select>
+				</td>
+			</tr>
+			<tr>
+				<td id="popt1"></td>
+				<td>
+					<select id="opt1"></select>
+				</td>
+			</tr>
+			<tr>
+				<td id="popt2"></td>
+				<td>
+					<select id="opt2"></select>
+				</td>
+			</tr>
+			<tr>
+				<td id="popt3"></td>
+				<td>
+					<select id="opt3"></select>
+				</td>
+			</tr>
+			<tr>
+				<td id="popt4"></td>
+				<td>
+					<input type="checkbox" id="relay1" onclick="choose_cmd()">
+					<input type="checkbox" id="relay2" onclick="choose_cmd()">
+					<input type="checkbox" id="relay3" onclick="choose_cmd()">
+					<input type="checkbox" id="relay4" onclick="choose_cmd()">
+					<input type="checkbox" id="relay5" onclick="choose_cmd()">
+					<input type="checkbox" id="relay6" onclick="choose_cmd()">
+					<input type="checkbox" id="relay7" onclick="choose_cmd()">
+					<input type="checkbox" id="relay8" onclick="choose_cmd()">
+				</td>
+			</tr>
+			<tr>
+				<td id="popt5"></td>
+				<td>
+					<select id="drop1" onchange="update_opt2()"></select>
+					<select id="drop2" onchange="update_opt2()"></select>
+					<select id="drop3" onchange="update_opt2()"></select>
+					<select id="drop4" onchange="update_opt2()"></select>
+					<select id="drop5" onchange="update_opt2()"></select>
+					<select id="drop6" onchange="update_opt2()"></select>
+					<select id="drop7" onchange="update_opt2()"></select>
+					<select id="drop8" onchange="update_opt2()"></select>
+				</td>
+			</tr>
+			<tr>
+				<td id="popt6"></td>
+				<td>
+					<input type="text" id="matrixtext" name="matrixtext" onchange="choose_cmd()">
+				</td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>
+					<button id="generate" onclick="generate_string()">generate</button>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="2"><h2 id="cmdstring"></h2></td>
+			</tr>
+			<tr>
+				<td colspan="2"id="help1"></td>
+			</tr>
+		</table>
+		
+	</div>
+	<div id="sourcegenerator" style="display:none">
+		<button onclick="return showgenerator('matrixgenerator','sourcegenerator');">Show Matrix Generator</button>
+		<h1>Audac Source Command Generator</h1>
+		<table>
+			<tr>
+				<td id="cmodule">choose module</td>
+				<td>
+					<select id="module" onchange="choose_module()"></select>
+				</td>
+			</tr>
+			<tr>
+				<td id="cslot">choose xmp slot</td>
+				<td>
+					<select id="slot"></select>
+				</td>
+			</tr>
+			<tr>
+				<td id="ccommand2">choose command</td>
+				<td>
+					<select id="command2" onchange="choose_cmd2()"></select>
+				</td>
+			</tr>
+			<tr>
+				<td id="pxopt1"></td>
+				<td>
+					<select id="xopt1"></select>
+				</td>
+			</tr>
+			<tr>
+				<td id="pxopt2"></td>
+				<td>
+					<select id="xopt2"></select>
+				</td>
+			</tr>
+			<tr>
+				<td id="pxmptext"></td>
+				<td>
+					<input type="text" id="xmptext" name="xmptext" onchange="choose_cmd2()">
+				</td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>
+					<button id="xmpgenerate" onclick="generate_xmpstring()">generate</button>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="2"><h2><p id="xmpstring"></p></h2></td>
+			</tr>
+			<tr>
+				<td colspan="2" id="help2"></td>
+			</tr>
+		</table>
+		
+	</div>
+<script>
+
+function showgenerator(shown, hidden) {
+  document.getElementById(shown).style.display='block';
+  document.getElementById(hidden).style.display='none';
+  return false;
+}
+function hide(id) {
+    document.getElementById(id).style.visibility = "hidden";
+}
+function show(id) {
+    document.getElementById(id).style.visibility = "visible";
+}
+// matrix commando generator
+var toestel = "";	
+var toestellen = ["","M2","R2","MTX","AMP523","SMAQ PMQ"];
+var adressen = ["","M001","R001","X001","X001","Q001"];
+var adres = "";
+//M2 gegevens
+var M2adr = ["M001","M002","M003","M004","M005","M006","M007","M008","M009"];
+//M2 Commands
+var M2cmd = ["","SV","SVU","SVD","SVALL","SR","SRU","SRD","SRALL","SB","ST","STI","SDA","SM","SMALL","SSG","SLINE","SMX","SRON","SROFF","SMXU","SMXD","GV","GVALL","GR","GRALL","GB","GT","GTI","GDA","GM","GMALL","GL","GSG","GIN","GZN","GLINE","GMXA","SAVE","DEF","WOM","WOR","WOW","PGRQ","PG","PLVF"];
+//M2 arguments voor command
+//0 = none
+//1 = output
+//2 = input
+//4 = 0 (disable) or 1 (eneable)
+//8 = volume in dB (from -70 to 0)
+//16 = bass/treble in dB (from -9 to +9)
+//32 = time (hhmmss, 24h format)
+//64 = date (yymmdd)
+//128 = line 1 to 4
+//256 = 00000000 (32 but hex value) voor relay
+//512 = step (6 = a step up of +6dB)
+//1024 = voicefile (always include 01)
+//2048 = frequentie in Hz
+//4096 = set mute all
+//8192 = set route/volume all
+var M2atr = ["","9","1","1","8200","3","1","1","8194","17","17","32","64","5","4096","2052","128","11","256","256","515","515","1","0","1","0","1","1","0","0","1","0","0","0","0","0","0","1","0","0","0","0","0","","","1024"];
+var M2in = ["off","input 1","input 2","input 3","input 4","input 5","input 6","input 7","input 8","input 9","prio 1","prio 2","sine generator","white noise generator","pink noise generator","WP1","WP2","WP3","WP4","WP5","WP6","WP7","WP8","FB1","FB2","FB3","FB4","FB5","FB6","FB7","FB8","scene 1","scene 2","scene 3","scene 4","scene 5","scene 6","scene 7","scene 8","Global scene 1","Global scene 2","Global scene 3","Global scene 4","Global scene 5","Global scene 6","Global scene 7","Global scene 8"];
+var M2innr = ["0","1","2","3","4","5","6","7","8","9","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","51","52","53","54","55","56","57","58","61","62","63","64","65","66","67","68"];
+var M2out = ["output 1","output 2","output 3","output 4","output 5","output 6","output 7","output 8","WP1","WP2","WP3","WP4","WP5","WP6","WP7","WP8","FB1","FB2","FB3","FB4","FB5","FB6","FB7","FB8"];
+var M2outnr = ["1","2","3","4","5","6","7","8","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27"];
+//R2 gegevens
+var R2adr = ["R001","R002","R003","R004","R005","R006","R007","R008","R009"];
+var R2cmd = ["","SV","SVU","SVD","SVALL","SR","SRU","SRD","SRALL","SB","ST","SBR","STI","SDA","SM","SMALL","SSG","SDI","GV","GVALL","GR","GRALL","GB","GT","GTI","GDA","GM","GMALL","GL","GSG","GSV","SAVE","DEF","WOR","PGRQ","PG"];
+//0 = none
+//1 = output
+//2 = input
+//4 = 0 (disable) or 1 (eneable)
+//8 = volume in dB (from -70 to 0)
+//16 = bass/treble in dB (from -9 to +9)
+//32 = time (hhmmss, 24h format)
+//64 = date (yymmdd)
+//2048 = frequentie in Hz
+//4096 = mute all
+//8192 = set route/volume all
+var R2atr = ["","9","1","1","8200","3","1","1","8194","17","17","4096","32","64","5","4096","2052","4","1","0","1","0","1","1","0","0","1","0","0","0","0","0","0","0","",""];
+//R2 inputs
+var R2in = ["off","input 1","input 2","input 3","input 4","input 5","input 6","input 7","input 8","dont use (system input)","dont use (system input","digital/optial in","Prio 1","Prio 2","Sine Generator","white noise generator","pink noise generator","WP1","WP2","WP3","WP4","WP5","WP6","WP7","WP8","FB1","FB2","FB3","FB4","FB5","FB6","FB7","FB8"];
+var R2innr = ["0","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32"];
+//R2 outputs
+var R2out = ["Zone 1","Zone 2","Zone 3","Zone 4","Zone 5","Zone 6","Zone 7","Zone 8","dont use (system output)","dont use (system output)","digital/optical out","WP1","WP2","WP3","WP4","WP5","WP6","WP7","WP8","FB1","FB2","FB3","FB4","FB5","FB6","FB7","FB8"];
+var R2outnr = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27"];
+//MTX gegevens
+var MTXadr = ["X001"];
+var MTXcmd = ["","SV","SVU0","SVD0","SR","SRU0","SRD0","SB0","ST0","SM0","GVALL","GRALL","GMALL","GV0","GR0","GM0","GB0","GT0","GZI0","SAVE","DEF","GSV"];
+//0 = none
+//1 = output
+//2 = input
+//4 = 0 (disable) or 1 (eneable)
+//8 = volume in dB (from -70 to 0)
+//16 = bass/treble in dB (from -9 to +9)
+var MTXatr = ["","9","1","1","3","1","1","17","17","1","0","0","0","1","1","1","1","1","1","0","0","0"];
+//MTX Inputs
+var MTXin = ["off","Mic 1","Mic 2","Line 3","Line 4","Line 5","Line 6","Remote 1","Remote 2"];
+var MTXinnr = ["0","1","2","3","4","5","6","7","8"];
+//MTX outputs
+var MTXout = ["Zone 1","Zone 2","Zone 3","Zone 4","Zone 5","Zone 6","Zone 7","Zone 8"];
+var MTXoutnr = ["1","2","3","4","5","6","7","8"];
+//AMP gegevens
+var AMPadr = ["X001"];
+var AMPcmd = ["","SV01","SVU01","SVD01","SVL","SVM","SR01","SRU01","SRD01","SB01","ST01","SM01","GSA","SAVE","DEF","GSV"];
+//0 = none
+//1 = output
+//2 = input
+//4 = 0 (disable) or 1 (eneable)
+//8 = volume in dB (from -70 to 0)
+//16 = bass/treble in dB (from -14 to 14)
+var AMPatr = ["","8","0","0","8","8","2","0","0","16","16","4","0","0","0","0"];
+var AMPin = ["off","Line 1","Line 2","Line 3","Line 4","WLI-WMI/MIC"];
+var AMPinnr = ["0","1","2","3","4","5"];
+var AMPout = [""];
+var AMPoutnr = [""];
+
+var smaqadr = ["Q001"];
+var smaqcmd = ["","SV0","SVU0","SVD0","SR0","SRU0","SRD0","SM0","GV0","GR0","GM0","GTE"];
+//0 = none
+//1 = output
+//2 = input
+//4 = 0 (disable) or 1 (eneable)
+//8 = volume in dB (from -70 to 0)
+//16 = bass/treble in dB (from -14 to 14)
+var smaqatr = ["","9","1","1","3","1","1","5","1","1","1","0"];
+var smaqin = ["off","input 1","input 2","input 1+2","input 3","input 4","input 3+4","Dante 1","Dante 2","Dante 1+2","Dante 3","Dante 4","Dante 3+4"];
+var smaqinnr = ["0","1","2","3","4","5","6","7","8","9","10","11","12"];
+var smaqout = ["output 1","output 2","output 3","output 4"];
+var smaqoutnr = ["1","2","3","4"];
+
+function startup(){
+	option_function(toestellen,adressen,"device");
+	option_function(XMPmodules,XMPmodules,"module");
+	choose_module();
+	hide("cadres");
+	hide("adres");
+	hide("ccommand");
+	hide("command");
+	hide("opt1");
+	hide("opt2");
+	hide("opt3");
+	hide("relay1");
+	hide("relay2");
+	hide("relay3");
+	hide("relay4");
+	hide("relay5");
+	hide("relay6");
+	hide("relay7");
+	hide("relay8");
+	hide("drop1");
+	hide("drop2");
+	hide("drop3");
+	hide("drop4");
+	hide("drop5");
+	hide("drop6");
+	hide("drop7");
+	hide("drop8");
+	hide("matrixtext");
+	hide("generate");
+
+	hide("slot");
+	hide("cslot");
+	hide("command2");
+	hide("ccommand2");
+	hide("xopt1");
+	hide("xopt2");
+	hide("xmptext");
+	hide("xmpgenerate")
+}
+
+function option_function(tekst,waarde,veld){
+	//plaatst items in dropdown list
+	clear_option(veld);
+	for(var i = 0, len = tekst.length;i<len;i++){
+		var a = document.createElement("option");
+		a.setAttribute("value",waarde[i]);
+		var b = document.createTextNode(tekst[i]);
+		a.appendChild(b);
+		document.getElementById(veld).appendChild(a);
+
+	}		
+}
+
+function clear_option(id){
+	// maakt dropdown list leeg
+	var x = document.getElementById(id);
+	for(var j = x.length-1;j>=0;j--){
+		    	x.remove(x.length-1);
+	}
+}
+function get_tekst(select){
+	var sel = document.getElementById(select);
+    var tekst = sel.options[sel.selectedIndex].text;
+    return tekst;
+}
+
+function choose_device() {
+    var toestel = get_tekst("device");
+    clear_screen();
+    show("adres");
+    show("cadres");
+    show("command");
+    show("ccommand");
+    if(toestel=="M2"){
+    	option_function(M2adr,M2adr,"adres");
+    	option_function(M2cmd,M2atr,"command");
+    }
+    else if(toestel=="R2"){
+    	option_function(R2adr,R2adr,"adres");
+    	option_function(R2cmd,R2atr,"command");
+    }
+    else if(toestel=="MTX"){
+    	option_function(MTXadr,MTXadr,"adres");
+    	option_function(MTXcmd,MTXatr,"command");
+    }
+    else if(toestel=="AMP523"){
+    	option_function(AMPadr,AMPadr,"adres");
+    	option_function(AMPcmd,AMPatr,"command");
+    }
+    else if(toestel=="SMAQ PMQ"){
+    	option_function(smaqadr,smaqadr,"adres");
+    	option_function(smaqcmd,smaqatr,"command");
+    }
+    else{
+    	document.getElementById("cmdstring").innerHTML = "no device selected "+toestel;
+    	hide("adres");
+    	hide("cadres");
+    	hide("command");
+    	hide("ccommand");
+    }
+}
+
+function update_opt2(){
+	var droplist = "0^0^0^0^0^0^0^0";
+	var opt2str = [];
+	droplist = document.getElementById("drop1").value;
+	droplist = droplist + "^" + document.getElementById("drop2").value;
+	droplist = droplist + "^" + document.getElementById("drop3").value;
+	droplist = droplist + "^" + document.getElementById("drop4").value;
+	droplist = droplist + "^" + document.getElementById("drop5").value;
+	droplist = droplist + "^" + document.getElementById("drop6").value;
+	droplist = droplist + "^" + document.getElementById("drop7").value;
+	droplist = droplist + "^" + document.getElementById("drop8").value;
+
+	opt2str = [droplist];
+	option_function(opt2str,opt2str,"opt2");
+}
+function clear_screen(){
+	clear_option("opt1");
+	clear_option("opt2");
+	clear_option("opt3");
+	document.getElementById("popt1").innerHTML = "";
+	document.getElementById("popt2").innerHTML = "";
+	document.getElementById("popt3").innerHTML = "";
+	document.getElementById("popt4").innerHTML = "";
+	document.getElementById("popt5").innerHTML = "";
+	document.getElementById("popt6").innerHTML = "";
+	document.getElementById("help1").innerHTML = "";
+	hide("opt1");
+	hide("opt2");
+	hide("opt3");
+	hide("relay1");
+	hide("relay2");
+	hide("relay3");
+	hide("relay4");
+	hide("relay5");
+	hide("relay6");
+	hide("relay7");
+	hide("relay8");
+	hide("drop1");
+	hide("drop2");
+	hide("drop3");
+	hide("drop4");
+	hide("drop5");
+	hide("drop6");
+	hide("drop7");
+	hide("drop8");
+	hide("matrixtext");
+}
+
+function choose_cmd(){
+	clear_screen();
+	var all = 0;
+	var adres = document.getElementById("adres").value;
+	var commando = document.getElementById("command").value;
+	var commandotekst = get_tekst("command");
+	var toestel = get_tekst("device");
+	var tekst = "";
+	var info = help(commandotekst);
+	document.getElementById("help1").innerHTML =info;
+	
+	show("generate");
+	document.getElementById("cmdstring").innerHTML = "";
+	if(commando==""){
+		document.getElementById("help1").innerHTML = "<h1><font color='red'>command not functional yet</font></h1>";
+		hide("generate");
+	}
+	var nul = ["0"];
+	if(commando == 0){
+		option_function(nul,nul,"opt2");
+	}
+	else{
+		while(commando > 0){
+			if (commando >= 8192){
+				all = 1;
+				commando = commando - 8192;
+				show("drop1");
+				show("drop2");
+				show("drop3");
+				show("drop4");
+				show("drop5");
+				show("drop6");
+				show("drop7");
+				show("drop8");
+				if (commando >=8){
+					//volume
+					document.getElementById("popt5").innerHTML = "choose volume per zone ";
+				}
+				else if (commando >=2){
+					//input
+					document.getElementById("popt5").innerHTML = "choose input per zone ";
+				}
+			}
+			if (commando >= 4096){
+				//set Mute all
+				commando = commando - 4096;
+				if (commandotekst == "SBR"){
+					document.getElementById("popt4").innerHTML="select zones to bridge";
+				}
+				else {
+					document.getElementById("popt4").innerHTML="select zones to mute";
+				}
+				show("relay1");
+				show("relay2");
+				show("relay3");
+				show("relay4");
+				show("relay5");
+				show("relay6");
+				show("relay7");
+				show("relay8");
+				var check1 = document.getElementById("relay1");
+				var check2 = document.getElementById("relay2");
+				var check3 = document.getElementById("relay3");
+				var check4 = document.getElementById("relay4");
+				var check5 = document.getElementById("relay5");
+				var check6 = document.getElementById("relay6");
+				var check7 = document.getElementById("relay7");
+				var check8 = document.getElementById("relay8");
+				var mute1 = 0;
+				var mute2 = 0;
+				var mute3 = 0;
+				var mute4 = 0;
+				var mute5 = 0;
+				var mute6 = 0;
+				var mute7 = 0;
+				var mute8 = 0;
+
+				if(check1.checked == true){
+					mute1 = 1;
+				}
+				if(check2.checked == true){
+					mute2 = 1;
+				}
+				if(check3.checked == true){
+					mute3 = 1;
+				}
+				if(check4.checked == true){
+					mute4 = 1;
+				}
+				if(check5.checked == true){
+					mute5 = 1;
+				}
+				if(check6.checked == true){
+					mute6 = 1;
+				}
+				if(check7.checked == true){
+					mute7 = 1;
+				}
+				if(check8.checked == true){
+					mute8 = 1;
+				}
+				var mutestring = mute1 + "^" + mute2 + "^" + mute3 + "^" + mute4 + "^" + mute5 + "^" + mute6 + "^" + mute7 + "^" + mute8;
+				var mutearray = [mutestring];
+				option_function(mutearray,mutearray,"opt2");
+			}
+			else if (commando >= 2048){
+				//sine generator frequentie
+				document.getElementById("popt3").innerHTML = "choose frequentie for sinewave generator";
+				commando = commando - 2048;
+				var freq = ["20","30","40","50","60","70","80","90","100","200","300","400","500","600","700","800","900","1000","2000","3000","4000","5000","6000","7000","8000","9000","10000","11000","12000","13000","14000","15000","16000","17000","18000","19000","20000","21000","22000"];
+				option_function(freq,freq,"opt3");
+				show("opt3");
+				document.getElementById("opt3").selectedIndex = 17;
+			}
+			else if (commando >= 1024){
+				// voicefile
+				commando = commando - 1024;
+				
+				var voicefile = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16"];
+				var voiceid = ["00","01","02","03","04","05","06","07","08","09","10","11","12","13","14","15"];
+				var nuleen = ["01"];
+				option_function(voicefile,voiceid,"opt1");
+				option_function(nuleen,nuleen,"opt2");
+				document.getElementById("popt1").innerHTML = "choose a voicefile preset you want to activate";
+				show("opt1");
+			}
+			else if (commando >= 512){
+				// step value
+				commando = commando - 512;
+				var step = ["1","2","3","4","5","6","7","8","9","10"];
+				option_function(step,step,"opt3");
+				document.getElementById("popt3").innerHTML = "choose a step value";
+				show("opt3")
+			} 
+			else if (commando >= 256){
+				//relay 00000000 
+				commando = commando - 256;
+				var M2relay = 0;
+				show("relay1");
+				show("relay2");
+				show("relay3");
+				show("relay4");
+				show("relay5");
+				show("relay6");
+				show("relay7");
+				show("relay8");
+				var check1 = document.getElementById("relay1");
+				var check2 = document.getElementById("relay2");
+				var check3 = document.getElementById("relay3");
+				var check4 = document.getElementById("relay4");
+				var check5 = document.getElementById("relay5");
+				var check6 = document.getElementById("relay6");
+				var check7 = document.getElementById("relay7");
+				var check8 = document.getElementById("relay8");
+				if(check1.checked == true){
+					M2relay = M2relay + 1;
+				}
+				if(check2.checked == true){
+					M2relay = M2relay + 2;
+				}
+				if(check3.checked == true){
+					M2relay = M2relay + 4;
+				}
+				if(check4.checked == true){
+					M2relay = M2relay + 8;
+				}
+				if(check5.checked == true){
+					M2relay = M2relay + 16;
+				}
+				if(check6.checked == true){
+					M2relay = M2relay + 32;
+				}
+				if(check7.checked == true){
+					M2relay = M2relay + 64;
+				}
+				if(check8.checked == true){
+					M2relay = M2relay + 128;
+				}
+				var relayhex = M2relay.toString(16);
+				var relaystring = "";
+				if(M2relay <= 16){
+					relaystring = "0000000" + relayhex;
+				}
+				else{
+					relaystring = "000000" + relayhex;
+				}
+				var relaysend = [relaystring];
+				option_function(relaysend,relaysend,"opt2")
+				document.getElementById("popt4").innerHTML = "choose relay's";
+			}
+			else if (commando >= 128){
+				//line 1 to 4 (only in M2)
+				commando = commando - 128;
+				var sline = ["1","2","3","4"];
+				option_function(sline,sline,"opt2");
+				show("opt2");
+				document.getElementById("popt2").innerHTML = "choose wich line input you want to use from input 9";
+			}
+			else if (commando >= 64){
+				//date (yymmdd)
+				commando = commando - 64;
+				show("matrixtext");
+				var input =[document.getElementById("matrixtext").value];
+				option_function(input,input,"opt2");
+				document.getElementById("popt6").innerHTML = "enter date (yymmdd)";
+			}
+			else if (commando >= 32){
+				//time (hhmmss 24h format)
+				commando = commando - 32;
+				show("matrixtext");
+				var input =[document.getElementById("matrixtext").value];
+				option_function(input,input,"opt2");
+				document.getElementById("popt6").innerHTML = "enter time (hhmmss)";
+			}
+			else if (commando >= 16){
+				//Bass / trebble -9 tot 9
+				commando = commando - 16;
+				var bt1 = [];
+				var bt2 = [];
+				if (document.getElementById("adres").value == "X001"){
+					bt1 = ["14","12","10","8","6","4","2","0","-2","-4","-6","-8","-10","-12","-14"];
+					bt2 = ["14","13","12","11","10","9","8","7","6","5","4","3","2","1","0"];
+				}
+				else{
+					bt1 = ["9","8","7","6","5","4","3","2","1","0","-1","-2","-3","-4","-5","-6","-7","-8","-9"];
+					bt2 = bt1;
+				}
+				option_function(bt1,bt2,"opt2");
+				if(document.getElementById("adres").value =="X001"){
+					document.getElementById("opt2").selectedIndex = 7;
+				}
+				else{
+					document.getElementById("opt2").selectedIndex = 9;
+				}
+				show("opt2");
+				document.getElementById("popt2").innerHTML = "set bass/treble dB";
+			}
+			else if (commando >= 8){
+				//Volume -x tot 0
+				//M2: x= 100
+				//R2: x= 150
+				//MTX: x= 70
+				//AMP: x= 80
+				//smaq: x= 70
+				commando = commando - 8;
+				var minimum = 0;
+				var vol1 = [];
+				var vol2 = [];
+				if (toestel == "M2"){
+					minimum = 100;
+				}
+				else if (toestel == "R2"){
+					minimum = 150;
+				}
+				else if (toestel == "MTX" || toestel =="SMAQ PMQ"){
+					minimum = 70;
+				}
+				else if (toestel == "AMP523"){
+					minimum = 80;
+				}
+				else{
+					minimum = 0;
+				}
+				for(var i = 0 ; i <= minimum ;i++)
+				{
+					vol1[i]="-"+i;
+					vol2[i]=i;
+				}
+				option_function(vol1,vol2,"drop1");
+				option_function(vol1,vol2,"drop2");
+				option_function(vol1,vol2,"drop3");
+				option_function(vol1,vol2,"drop4");
+				option_function(vol1,vol2,"drop5");
+				option_function(vol1,vol2,"drop6");
+				option_function(vol1,vol2,"drop7");
+				option_function(vol1,vol2,"drop8");
+				update_opt2();
+				if (all == 1){
+					var bewbs= "";
+				}
+				else{
+					if(commando >= 2){
+						option_function(vol1,vol2,"opt3");
+						show("opt3");
+						document.getElementById("popt3").innerHTML = "select volume";
+					}
+					else{
+						option_function(vol1,vol2,"opt2");
+						show("opt2");
+						document.getElementById("popt2").innerHTML = "select volume";
+					}
+				}
+			}
+			else if (commando >= 4){
+				//0 (disable) 1 (enable)
+				commando = commando - 4;
+				var aanuit = ["1","0"];
+				option_function(aanuit,aanuit,"opt2");
+				show("opt2");
+				if(commandotekst=="SDI"){
+					document.getElementById("popt2").innerHTML = "0 (COAX), 1 (TOSLINK)";
+				}
+				else {
+					document.getElementById("popt2").innerHTML = "0 (disable), 1 (enable)";
+				}
+			}
+			else if (commando >= 2){
+				// INPUT
+				commando = commando - 2;
+				if(toestel=="M2"){
+					if(all ==1){
+						option_function(M2in,M2innr,"drop1");
+						option_function(M2in,M2innr,"drop2");
+						option_function(M2in,M2innr,"drop3");
+						option_function(M2in,M2innr,"drop4");
+						option_function(M2in,M2innr,"drop5");
+						option_function(M2in,M2innr,"drop6");
+						option_function(M2in,M2innr,"drop7");
+						option_function(M2in,M2innr,"drop8");
+						update_opt2();
+					}
+					else{
+						option_function(M2in,M2innr,"opt2");
+					}
+				}
+				else if(toestel=="R2"){
+					if(all==1){
+						option_function(R2in,R2innr,"drop1");
+						option_function(R2in,R2innr,"drop2");
+						option_function(R2in,R2innr,"drop3");
+						option_function(R2in,R2innr,"drop4");
+						option_function(R2in,R2innr,"drop5");
+						option_function(R2in,R2innr,"drop6");
+						option_function(R2in,R2innr,"drop7");
+						option_function(R2in,R2innr,"drop8");
+						update_opt2();
+					}
+					else{
+						option_function(R2in,R2innr,"opt2");
+					}
+				}
+				else if(toestel=="MTX"){
+					option_function(MTXin,MTXinnr,"opt2");
+				}
+				else if(toestel=="SMAQ PMQ"){
+					option_function(smaqin,smaqinnr,"opt2");
+				}
+				if(all!=1){
+					show("opt2");
+					document.getElementById("popt2").innerHTML = "select input";
+				}
+				
+			}
+			else if (commando >= 1){
+				// OUTPUT
+				commando = commando - 1;
+				if(toestel=="M2"){
+					option_function(M2out,M2outnr,"opt1");
+				}
+				else if(toestel=="R2"){
+					option_function(R2out,R2outnr,"opt1");
+				}
+				else if(toestel=="MTX"){
+					option_function(MTXout,MTXoutnr,"opt1");
+				}
+				else if(toestel=="SMAQ PMQ"){
+					option_function(smaqout,smaqoutnr,"opt1");
+				}
+				show("opt1");
+				document.getElementById("popt1").innerHTML = "select zone";
+			}
+			else{
+				document.getElementById("cmdstring").innerHTML = get_tekst("cmdstring")+" bewbs";
+			}
+		}
+		if(document.getElementById("opt2").value == ""){
+			option_function(nul,nul,"opt2");
+		}
+	}
+}
+
+function generate_string(){
+
+	string = "#|";
+	string = string + document.getElementById("adres").value;
+	string = string + "|F001|";
+	string = string + get_tekst("command");
+	string = string + document.getElementById("opt1").value;
+	string = string + "|";
+	string = string + document.getElementById("opt2").value;
+	if(document.getElementById("opt3").value != ""){
+		string = string + "^" + document.getElementById("opt3").value;
+	}
+	else{
+		string = string;
+	}
+	string = string + "|U|<CR><LF>";
+
+	document.getElementById("cmdstring").innerHTML=string;
+}
+function help(command){
+	var helptekst="";
+	if(command == "SV"){
+		helptekst = "Set volume for an output to a certain level";
+	}
+	else if(command == "SVU" || command == "SVU0"){
+		helptekst = "Set volume up with 3dB for an output";
+	}
+	else if(command == "SVD" || command == "SVD0"){
+		helptekst = "Set volume down with 3dB for an output";
+	}
+	else if(command == "SVALL"){
+		helptekst = "Set volume for all Zones";
+	}
+	else if(command == "GV" || command == "GV0"){
+		helptekst = "Get volume in a zone";
+	}
+	else if(command == "GVALL"){
+		helptekst = "Get volume in all zones";
+	}
+	else if(command == "SR"){
+		helptekst = "Set routing in a zone from a input";
+	}
+	else if(command == "SRU" || command == "SRU0"){
+		helptekst = "Set Routing up";
+	}
+	else if(command == "SRD" || command == "SRD0"){
+		helptekst = "Set Routing down";
+	}
+	else if(command == "SRALL"){
+		helptekst = "set routing for all zones";
+	}
+	else if(command == "GR" || command == "GR0"){
+		helptekst = "Get routing from a zone";
+	}
+	else if(command == "GRALL"){
+		helptekst = "Get routing in all zones";
+	}
+	else if(command == "SB" || command == "SB0"){
+		helptekst = "Set bass in a zone";
+	}
+	else if(command == "GB" || command == "GB0"){
+		helptekst = "Get bass in a zone";
+	}
+	else if(command == "ST" || command == "ST0"){
+		helptekst = "Set treble in a zone";
+	}
+	else if(command == "GT" || command == "GT0"){
+		helptekst = "Get treble in a zone";
+	}
+	else if(command == "STI"){
+		helptekst = "Set time";
+	}
+	else if(command == "SDA"){
+		helptekst = "set date";
+	}
+	else if(command == "GTI"){
+		helptekst = "Get time";
+	}
+	else if(command == "GDA"){
+		helptekst = "Get Date";
+	}
+	else if(command == "SM" || command == "SM0"){
+		helptekst = "Set mute state in a zone";
+	}
+	else if(command == "SMALL"){
+		helptekst = "Set mute states in all zones (mute can be different for all zones)";
+	}
+	else if(command == "GM" || command == "GM0"){
+		helptekst = "Get mute state from a zone";
+	}
+	else if(command == "GMALL"){
+		helptekst = "Get mute states from all zones";
+	}
+	else if(command == "GL"){
+		helptekst = "Gets the system load in %.";
+	}
+	else if(command == "SSG"){
+		helptekst = "Set sine generator";
+	}
+	else if(command == "GSG"){
+		helptekst = "Get sine generator";
+	}
+	else if(command == "SAVE"){
+		helptekst = "Saves the current zone settings (routing, volume, names, bass, treble,scenes ...)";
+	}
+	else if(command == "DEF"){
+		helptekst = "All zone settings and device settings will be reset to factory default. (except for the network settings)";
+	}
+	else if(command == "GSV"){
+		helptekst = "Get the software version of the DSP board";
+	}
+	else if(command == "WOM"){
+		helptekst = "Who is online M types. Request a response from all M-type devices that are connected to each other by fibre Link.";
+	}
+	else if(command == "WOR"){
+		helptekst = "Who is online R types. Request a response from all R-type devices that are connected to each other by fibre Link.";
+	}
+	else if(command == "WOW"){
+		helptekst = "Connected Wall Panels. Request a response from all Wall Panel devices that are connected to the M2.";
+	}
+	else if(command == "PGRQ"){
+		helptekst = "NOT SUPPORTED YET";
+	}
+	else if(command == "PG"){
+		helptekst = "NOT SUPPORTED YET";
+	}
+	else if(command == "GIN"){
+		helptekst = "Get Input Names";
+	}
+	else if(command == "GZN"){
+		helptekst = "Get Zone Names";
+	}
+	else if(command == "SLINE"){
+		helptekst = "Set line 9 (line 1 to 4 can be set to line 9)";
+	}
+	else if(command == "GLINE"){
+		helptekst = "Get line 9";
+	}
+	else if(command == "SMX"){
+		helptekst = "Set mixing output";
+	}
+	else if(command == "SRON"){
+		helptekst = "Switch relay on";
+	}
+	else if(command == "SROFF"){
+		helptekst = "Switch relay off";
+	}
+	else if(command == "GMXA"){
+		helptekst = "Get output mixing";
+	}
+	else if(command == "SMXU"){
+		helptekst = "Set mixing output up";
+	}
+	else if(command == "SMXD"){
+		helptekst = "Set mixing output down";
+	}
+	else if(command == "PLVF"){
+		helptekst = "Play voice file preset";
+	}
+	else if(command == "SBR"){
+		helptekst = "set zone bridging";
+	}
+	else if(command == "GZI0"){
+		helptekst = "Get volume, routing, mute, bass, treble info for 1 zone";
+	}
+	else if(command == "SV01"){
+		helptekst = "Set output volume to a level";
+	}
+	else if(command == "SVU01"){
+		helptekst = "set volume up with 3dB";
+	}
+	else if(command == "SVD01"){
+		helptekst = "set volume down with 3dB";
+	}
+	else if(command == "SVL"){
+		helptekst = "Set volume WLI input";
+	}
+	else if(command == "SVM"){
+		helptekst = "Set volume Mic/WMI input";
+	}
+	else if(command == "SR01"){
+		helptekst = "set routing";
+	}
+	else if(command == "SRU01"){
+		helptekst = "increase routing";
+	}
+	else if(command == "SRD01"){
+		helptekst = "decrease routing";
+	}
+	else if(command == "SB01"){
+		helptekst = "set bass";
+	}
+	else if(command == "ST01"){
+		helptekst = "set treble";
+	}
+	else if(command == "SM01"){
+		helptekst = "set mute";
+	}
+	else if(command == "GSA"){
+		helptekst = "get website main screen settings";
+	}
+	else if(command == "GTE"){
+		helptekst = "Get temperature";
+	}
+	else{
+		helptekst = "";
+	}
+	return helptekst;
+}
+
+
+
+
+// XMP module generator
+
+var XMPadr = ["D001"];
+var XMPmodules = ["","BMP40","DMP40","FMP40","IMP40","MMP40","TMP40"];
+var XMPslot = ["1","2","3","4"]
+//
+//4096
+//2048
+//1024
+//512
+//256
+//128
+//64 forget paired device (1-8)
+//32 trigger number
+//16 repeat mode (one = 0, folder = 1, x times = 2,off = 3, all = 4)
+//8 number of preset (1 to 10)
+//4 1 (enable), 0 (disable)
+//2 input veld voor oa frequentie & isp pointer for station
+//1 volume van +8 tot -20 (+8= 0, 0=8, -20= 28)
+var XMPcmd = ["GTPS"];
+var XMPatr = ["0"];
+
+var BMPcmd = ["","S0G","GOG","GBMPI","GPAIRS","SPAIR","GPAIRL","GCONNL","SDISC","SFORGET","GPSTAT","SPPLAY","SPSTOP","SPPAUS","SPNEXT","SPPREV","GPSI","PPTI"];
+var BMPatr = ["","1","0","0","0","0","0","0","0","64","0","0","0","0","0","0","0","0"];
+
+var DMPcmd = ["","SOG","GOG","SFREQ","SFSUP","SFSDN","SELPR","SSBND","GPRGN","GRPGT","GFREQ","GCH","GBND","GSIGS","GSTST"];
+var DMPatr = ["","1","0","2","0","0","8","0","0","0","0","0","0","0","0"];
+
+var FMPcmd = ["","SOG","GOG","SSTR"];
+var FMPatr = ["","1","0","36"];
+
+var IMPcmd = ["","SOG","GOG","GSON","GSTN","GFAV","DWSEST"];
+var IMPatr = ["","1","0","0","0","0","2"];
+
+var MMPcmd = ["","SOG","GOG","SPPLAY","SPSTOP","SPPAUS","SPGTST","SPNEXT","SPPREV","SPFFW","SPFRW","SPRP","SPRND","GPSI","GPSTAT","GRRM","SRRM","SRSTA","SRSTO","SRPAU","SRCAN"];
+var MMPatr = ["","1","0","0","0","0","0","0","0","0","0","16","4","0","0","0","4","0","0","0","0"];
+
+var TMPcmd = ["","SOG","GOG","SFREQ","SFSUP","SFSDN","SELPR","GPRGN","GPRGT","GFREQ","GSIGS","GSTST"];
+var TMPatr = ["","1","0","2","0","0","8","0","0","0","0","0"];
+
+var xmptekst = document.getElementById("xmptext").value;
+var xstring = "";
+
+function choose_module(){
+	var chmodule = document.getElementById("module").value;
+	clear_xmpscreen();
+	option_function(XMPslot,XMPslot,"slot");
+	show("slot");
+	show("cslot");
+	show("command2");
+	show("ccommand2");
+	if(chmodule == "BMP40"){
+		option_function(BMPcmd,BMPatr,"command2");
+	}
+	else if(chmodule == "DMP40"){
+		option_function(DMPcmd,DMPatr,"command2");
+	}
+	else if(chmodule == "FMP40"){
+		option_function(FMPcmd,FMPatr,"command2");
+	}
+	else if(chmodule == "IMP40"){
+		option_function(IMPcmd,IMPatr,"command2");
+	}
+	else if(chmodule == "MMP40"){
+		option_function(MMPcmd,MMPatr,"command2");
+	}
+	else if(chmodule == "TMP40"){
+		option_function(TMPcmd,TMPatr,"command2");
+	}
+	else{
+		option_function(XMPcmd,XMPatr,"command2");
+		clear_option("slot");
+		hide("slot");
+		hide("cslot");
+		hide("command2");
+		hide("ccommand2");
+	}
+}
+function clear_xmpscreen(){
+	hide("xopt1");
+	hide("xopt2");
+	hide("xmptext");
+	clear_option("xopt1");
+	clear_option("xopt2");
+	document.getElementById("xmpstring").innerHTML="";
+	document.getElementById("help2").innerHTML="";
+	document.getElementById("pxopt1").innerHTML="";
+	document.getElementById("pxopt2").innerHTML="";
+	document.getElementById("pxmptext").innerHTML="";
+}
+
+function choose_cmd2(){
+	xmptekst = document.getElementById("xmptext").value;
+	clear_option("xopt1");
+	var nul = ["0"];
+	var commando2 = document.getElementById("command2").value;
+	var commandotekst2 = get_tekst("command2");
+	clear_xmpscreen();
+	show("xmpgenerate");
+	document.getElementById("help2").innerHTML = "";
+	if(commando2==""){
+		hide("xmpgenerate");
+		document.getElementById("help2").innerHTML="<font color='red'><h1>Command not functional yet</h1></font>";
+	}
+	else{
+		document.getElementById("help2").innerHTML = "";
+	}
+	if(commando2 == 0){
+		option_function(nul,nul,"xopt1");
+	}
+	else{
+		while(commando2 > 0){
+			if (commando2 >= 4096){
+				commando2 = commando2 - 4096;
+			}
+			else if (commando2 >= 2048){
+				commando2 = commando2 - 2048;
+			}
+			else if (commando2 >= 1024){
+				commando2 = commando2 - 1024;
+			}
+			else if (commando2 >= 512){
+				commando2 = commando2 - 512;
+			}
+			else if (commando2 >= 256){
+				commando2 = commando2 - 256;
+			}
+			else if (commando2 >= 128){
+				commando2 = commando2 - 128;
+			}
+			else if (commando2 >= 64){
+				//forget paired device (1-8)
+				commando2 = commando2 - 64;
+				var forget = [];
+				for (q = 0; q < 8; q++){
+					forget[q] = q+1;
+				}
+				option_function(forget,forget,"xopt1");
+				show("xopt1");
+				document.getElementById("pxopt1").innerHTML="choose wich paired device to forget";
+			}
+			else if (commando2 >= 32){
+				//trigger number
+				commando2 = commando2 - 32;
+				var trigger = [];
+				for (q = 0; q < 50; q++){
+					trigger[q] = q+1;
+				}
+				option_function(trigger,trigger,"xopt2");
+				show("xopt2");
+				document.getElementById("pxopt2").innerHTML="choose trigger";
+			}
+			else if (commando2 >= 16){
+				//repeat mode (one = 0, folder = 1, x times = 2,off = 3, all = 4)
+				commando2 = commando2 - 16;
+				var repeat = [];
+				for (q = 0; q < 5; q++){
+					repeat[q] = q;
+				}
+				option_function(repeat,repeat,"xopt1");
+				show("xopt1");
+				document.getElementById("pxopt1").innerHTML="choose repeat mode <br>(one = 0, folder = 1, x times = 2,off = 3, all = 4)";
+			}
+			else if (commando2 >= 8){
+				//number of preset 1 to 10
+				commando2 = commando2 - 8;
+				var preset = [];
+				for(q = 0; q < 10; q++){
+					preset[q] = q+1;
+				}
+				option_function(preset,preset,"xopt1");
+				show("xopt1");
+				document.getElementById("pxopt1").innerHTML="choose preset";
+			}
+			else if (commando2 >= 4){
+				// 1 (enable), 0 (disable) 
+				commando2 = commando2 - 4;
+				var aanuit = ["1","0"];
+				option_function(aanuit,aanuit,"xopt1");
+				show("xopt1");
+				document.getElementById("pxopt1").innerHTML="1 (enable), 0 (disable)";
+			}
+			else if (commando2 >= 2){
+				//inputbox
+				commando2 = commando2 - 2; 
+				var input =[document.getElementById("xmptext").value];
+				option_function(input,input,"xopt1");
+				show("xmptext");
+				if(commandotekst2=="SFREQ"){
+					document.getElementById("pxmptext").innerHTML="enter frequency <br> (104.10 = 10410)";
+				}
+				else if(commandotekst2=="DWSEST"){
+					document.getElementById("pxmptext").innerHTML="enter stations pointer";
+				}
+				else{
+					document.getElementById("pxmptext").innerHTML="bewbs";
+				}
+			}
+			else if (commando2 >= 1){
+				//volume van +8 to -20 (0 tot 28)
+				commando2 = commando2 - 1;
+				var volume2 = [];
+				var volume2tekst = [];
+				for(var q=0; q < 29 ; q++){
+					volume2[q]=q;
+					volume2tekst[q]=8-q;
+				}
+				option_function(volume2tekst,volume2,"xopt1");
+				document.getElementById("xopt1").selectedIndex=8;
+				show("xopt1");
+				document.getElementById("pxopt1").innerHTML="choose volume";
+			}
+			else{
+				commando2 = 0;
+			}
+		}
+	}
+}
+
+function generate_xmpstring(){
+	xstring = "#|D001|F001|";
+	xstring = xstring + get_tekst("command2");
+	xstring = xstring + document.getElementById("slot").value;
+	xstring = xstring + "|";
+	if(document.getElementById("xopt2").value != ""){
+		xstring = xstring + document.getElementById("xopt2").value + "^";
+	}
+	xstring = xstring + document.getElementById("xopt1").value;
+	xstring = xstring + "|U|";
+
+	document.getElementById("xmpstring").innerHTML = xstring;
+
+}
+</script>
+</body>
+</html>
+
